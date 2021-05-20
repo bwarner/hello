@@ -2,5 +2,6 @@
 
 export default (req, res) => {
   res.statusCode = 200
-  res.json({ name: 'John Doe' })
+  console.log(`body ${req.body}`);
+  res.json({ status: 'OK' });
 }
