@@ -16,7 +16,7 @@ export default async function handler(req, res) {
         template_id,
         subject,
         message,
-      } = JSON.parse(body);
+      } = body;
 
       // Update or create data in your database
       const opts = {
@@ -30,8 +30,8 @@ export default async function handler(req, res) {
       try {
       const result = await hellosign.signatureRequest.createEmbeddedWithTemplate(opts);
       console.log('createEmbeddedWithTemplate result  ', result);
-      const { signature_request: { signing_url: signingUrl, signatures } } = result;
-      // const { embedded: { sign_url: signUrl } } = await hellosign.embedded.getSignUrl(signatures[0]);
+      const { signature_request: { signatures } } = result;
+      const { embedded: { sign_url: signingUrl } } = await hellosign.embedded.getSignUrl(signatures[0]);
       console.log(`The signing url is: ${signingUrl} signatures ${signatures}`);
         res.status(200).json({ data: { signingUrl, signatures } });
       } catch (err) {

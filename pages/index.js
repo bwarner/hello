@@ -36,6 +36,10 @@ export default function Home() {
     try {
       const res = await fetch('/api/signature', {
         method: 'POST',
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(opts),
       });
 
