@@ -42,7 +42,6 @@ export default function Home() {
       const body = await res.json();
       if (res.ok) {
         const { data: { signingUrl } } = body;
-        debugger;
         client.open(signingUrl, {
           clientId: process.env.NEXT_PUBLIC_HELLOSIGN_CLIENT_ID,
         });

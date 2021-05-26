@@ -28,8 +28,8 @@ export default async function handler(req, res) {
         signers,
       };
       try {
-      const result = await hellosign.signatureRequest.sendWithTemplate(opts);
-      console.log('sendTemplate result  ', result);
+      const result = await hellosign.signatureRequest.createEmbeddedWithTemplate(opts);
+      console.log('createEmbeddedWithTemplate result  ', result);
       const { signature_request: { signing_url: signingUrl, signatures } } = result;
       // const { embedded: { sign_url: signUrl } } = await hellosign.embedded.getSignUrl(signatures[0]);
       console.log(`The signing url is: ${signingUrl} signatures ${signatures}`);
