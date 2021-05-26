@@ -40,6 +40,17 @@
   text-decoration: none;
 }
 
+.my-form {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+
+}
+.form-input {
+  margin: 10px;
+  background-color: red;
+}
+
 .title a:hover,
 .title a:focus,
 .title a:active {
