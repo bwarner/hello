@@ -32,7 +32,7 @@ export default function Home() {
         },
       ],
     };
-    const client = new HelloSign();
+    const client = new HelloSign({ clientId: process.env.NEXT_PUBLIC_HELLOSIGN_CLIENT_ID });
     try {
       const res = await fetch('/api/signature', {
         method: 'POST',
@@ -45,9 +45,11 @@ export default function Home() {
 
       const body = await res.json();
       if (res.ok) {
-        const { data: { signingUrl } } = body;
-        client.open(signingUrl, {
-          clientId: process.env.NEXT_PUBLIC_HELLOSIGN_CLIENT_ID,
+        const { data: { signUrl } } = body;
+        client.open(signUrl, {
+          testMode: true,
+          debug: true,
+          skip_domain_verification: true,
         });
       } else {
         const { error } = body;
