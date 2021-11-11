@@ -125,6 +125,13 @@
   height: 1em;
 }
 
+.nav ul {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;

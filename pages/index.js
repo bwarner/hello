@@ -1,8 +1,12 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import Main from '../lib/layout/main';
 
-const templateId="e17602c9261a29ede9fe60bfb35b1e71ea22691f";
+const templateId = "e17602c9261a29ede9fe60bfb35b1e71ea22691f";
+
+let client;
+const events = [];
 
 export default function Home() {
   const [subject, setSubject] = useState("Bill Of Lading");
@@ -10,12 +14,10 @@ export default function Home() {
   const [name, setName] = useState("Byron");
   const [email, setEmail] = useState("bwarner@oncue.co");
   const [errorMessage, setErrorMessage] = useState("");
+  const [ready, setReady] = useState(false);
 
   const onSubmit = useCallback(async (event) => {
     event.preventDefault();
-
-    const HelloSign = (await import('hellosign-embedded')).default;
-
     const { target } = event;
 
     const opts = {
@@ -32,7 +34,6 @@ export default function Home() {
         },
       ],
     };
-    const client = new HelloSign({ clientId: process.env.NEXT_PUBLIC_HELLOSIGN_CLIENT_ID });
     try {
       const res = await fetch('/api/signature', {
         method: 'POST',
@@ -60,80 +61,114 @@ export default function Home() {
       console.error(err);
       setErrorMessage(err.message ? err.message : err.toString());
     }
-  }, [subject, message, name, email]);
+  }, [subject, message, name, email, client]);
 
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>HelloSign Test</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main className={styles.main}>
-          <h1 className={styles.title}>
-            Testing Embedding Signing
-        </h1>
-          <div>
-            {errorMessage && <span>{errorMessage}</span>}
-          </div>
-          <form className="my-form" onSubmit={onSubmit}>
-            <div className="form-input">
-            <label htmlFor="subject">
-              Subject
-              <input
-              name="subject"
-              id="subject"
-              type="text"
-              value={subject}
-              required
-              onChange={event => setSubject(event.target.value)}
-              />
-            </label>
-            </div>
-            <div className="form-input"><label htmlFor="message">
-              Message
-              <input
-               name="message"
-              id="message"
-              type="text"
-              required
-              value={message}
-              onChange={event => setMessage(event.target.value)}
-              />
-            </label>
-            </div>
-            <div className="form-input"><label htmlFor="name">
-              Name
-              <input name="name"
-                id="name"
-                type="text"
-                required
-                value={name}
-                onChange={event => setName(event.target.value)}
-              />
-            </label>
-            </div>
-            <div className="form-input">
-            <label htmlFor="email">
-              Email
-              <input required name="email" type="email"  id="email" value={email} onChange={event => setEmail(event.target.value)} />
-            </label>
-            </div>
-            <div className="form-input">
-              <button type="submit">Create</button>
-            </div>
-          </form>
-      </main>
+  useEffect(async () => {
+    const { default: HelloSign } = await import('hellosign-embedded');
+    client = new HelloSign({ clientId: process.env.NEXT_PUBLIC_HELLOSIGN_CLIENT_ID });
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+    console.log('client created ', client);
+    client.on('ready', (data) => {
+      console.log('Ready!!!!')
+      events.push('Client is Ready');
+    });
+
+    client.on('open', (data) => {
+      events.push('The document has been opened!');
+      console.log('data', JSON.stringify(data, undefined, 2));
+    });
+
+    client.on('error', (data) => {
+      events.push('Recieved error');
+      console.log('data', JSON.stringify(data, undefined, 2));;;
+    });
+
+    client.on('cancel', (data) => {
+      events.push('Cancelled');
+      console.log('data', JSON.stringify(data, undefined, 2));;
+    });
+
+    client.on('close', (data) => {
+      events.push('Closed');
+      console.log('data', JSON.stringify(data, undefined, 2));;
+    });
+    client.on('sign', (data) => {
+      console.log('events before', events);
+      events.push(
+        'The document has been signed!, Signature ID: ' + data.signatureId
+      );
+      console.log('events after', events);
+    });
+    client.on('finish', (data) => {
+      events.push('document signing finsihed!');
+    });
+    setReady(true);
+  }, []);
+
+  const aside = () => (<>
+    <h2>Signing Client-side events</h2>
+    {events.length > 0 &&
+      <ul>
+        {events.map((event, i) =>
+        (<li key={i}>
+          <code>{JSON.stringify(event, null, 2)}</code>
+        </li>)
+        )}
+      </ul>}
+  </>);
+
+return (
+  <Main aside={aside}>
+    <div>
+      {errorMessage && <span>{errorMessage}</span>}
     </div>
-  )
+    <form className="my-form" onSubmit={onSubmit}>
+      <div className="form-input">
+        <label htmlFor="subject">
+          Subject
+          <input
+            name="subject"
+            id="subject"
+            type="text"
+            value={subject}
+            required
+            onChange={event => setSubject(event.target.value)}
+          />
+        </label>
+      </div>
+      <div className="form-input"><label htmlFor="message">
+        Message
+        <input
+          name="message"
+          id="message"
+          type="text"
+          required
+          value={message}
+          onChange={event => setMessage(event.target.value)}
+        />
+      </label>
+      </div>
+      <div className="form-input"><label htmlFor="name">
+        Name
+        <input name="name"
+          id="name"
+          type="text"
+          required
+          value={name}
+          onChange={event => setName(event.target.value)}
+        />
+      </label>
+      </div>
+      <div className="form-input">
+        <label htmlFor="email">
+          Email
+          <input required name="email" type="email" id="email" value={email} onChange={event => setEmail(event.target.value)} />
+        </label>
+      </div>
+      <div className="form-input">
+        <button type="submit" disabled={!ready}>Create</button>
+      </div>
+    </form>
+  </Main>
+)
 }
