@@ -7,6 +7,8 @@ import set from 'lodash/fp/set';
 
 export default function ViewOrder(props) {
   const [order, setOrder] = useState(props.order);
+  const [draft, setDraft] = useState(false);
+
   const router = useRouter();
   const onSubmit = (e) => {
     e.preventDefault();
@@ -14,7 +16,7 @@ export default function ViewOrder(props) {
     const query = Array.from(formData.entries()).reduce((params, [name, value]) => {
       return {...params, ...{[name]: value}};
     }, {});
-    debugger;
+    query.draft = draft;
     router.push({
       pathname: '/embedded-request',
       query,
@@ -64,8 +66,8 @@ export default function ViewOrder(props) {
         <label htmlFor="destination.zip">Zip: <input name="destination.zip" value={order.destination.zip} onChange={handleChange} data-lpignore="true"/></label>
       </div>
     </fieldset>
-    <button type="submit">Signing Request</button><br />
-    <button type="submit">Embedded Signing Request</button>
+    <button type="submit" onClick={()=> setDraft(false)}>Embedded Signing Request</button>
+    <button type="submit" onClick={()=> setDraft(true)}>Embedded Draft Request</button><br />
     </form>
   </Main>);
 }

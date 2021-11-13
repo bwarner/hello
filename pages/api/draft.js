@@ -10,14 +10,6 @@ export default async function handler(req, res) {
   } = req
   switch (method) {
     case 'POST': {
-      // const {
-      //   signers,
-      //   clientId,
-      //   template_id,
-      //   subject,
-      //   message,
-      // } = body;
-
       // Update or create data in your database
       const opts = {
         test_mode: 1,
@@ -26,12 +18,18 @@ export default async function handler(req, res) {
       };
       try {
         console.log('createEmbeddedWithTemplate ', opts);
-        const result = await hellosign.signatureRequest.createEmbeddedWithTemplate(opts);
+        const result = await hellosign.unclaimedDraft.createEmbeddedWithTemplate(opts);
         console.log('createEmbeddedWithTemplate result  ', JSON.stringify(result, null, 2));
-        const { signature_request: { signing_url: signingUrl, signatures: [signature] } } = result;
-        const { embedded: { sign_url: signUrl }} = await hellosign.embedded.getSignUrl(signature.signature_id)
-        console.log(`The signUrl is: ${signUrl}`);
-        res.status(200).json({ data: { signUrl } });
+        const {
+          unclaimed_draft: {
+          claim_url,
+          signing_redirect_url,
+          test_mode,
+          signature_request_id
+          }
+        } = result;
+        console.log(`The signUrl is: ${claim_url}`);
+        res.status(200).json({ data: { claim_url } });
       } catch (err) {
         console.error(err);
         res.status(400).json({ error: err.message ? err.message : err.toString()});
