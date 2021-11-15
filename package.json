@@ -13,6 +13,7 @@
     "hellosign-sdk": "^1.6.1",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
+    "multiparty": "^4.2.2",
     "next": "10.x",
     "react": "17.x",
     "react-dom": "17.x",

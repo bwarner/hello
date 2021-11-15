@@ -51,7 +51,6 @@ export default function CreateEmbeddedRequest(props) {
     const query = Array.from(formData.entries()).reduce((params, [name, value]) => set(name, value, params), {});
 
     const serviceUrl = draft == 'true' ? '/api/draft' : '/api/signature';
-    debugger;
     let res = await fetch(serviceUrl, {
       method: 'POST',
       headers: {
@@ -67,7 +66,7 @@ export default function CreateEmbeddedRequest(props) {
       console.log('response ', body);
       const url = draft === 'true' ? body.data.claim_url : body.data.signUrl;
       router.push({
-        pathname: '/embedded-signing',
+        pathname: '/embedded-viewer',
         query: { url },
       });
     } else {

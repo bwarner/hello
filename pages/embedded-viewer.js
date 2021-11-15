@@ -23,15 +23,15 @@ export default function EmbeddedSigning({ url }) {
   }, [client]);
   return (
   <Main
-   heading="Sign Documents"
+   heading="Embedded Viewer"
    aside={() => {
     return (<ul>
-      {events.reverse().map(event => <li key={event.key}>{event.name}</li>)}
+      {events.reverse().map((event, index) => <li key={index}>{event.name}</li>)}
     </ul>);
    }}
   >
     <Head>
-        <title>Embedded Signing</title>
+        <title>Embedded Viewer</title>
     </Head>
     <div id="sign-here" ref={containerRef}></div>
   </Main>);
