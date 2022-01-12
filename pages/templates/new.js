@@ -11,11 +11,12 @@ export default function CreateDraftTemplate(props) {
   const user = userJson ? JSON.parse(userJson) : {};
   const [fileChoice, setFileChoice] = useState(0);
   const { id, name, email, origin, destination, draft } = props;
+  const [fileUrl, setFileUrl] = useState('https://jordanrivermoving.com/files/BOL-Terms_and_Conditions_J_r.pdf');
   const router = useRouter();
   const [request, setRequest] = useState({
     title: `Bill of Lading`,
     signer_roles: 'carrier,shipper',
-    metadata: JSON.stringify({ company_id: 101 })
+    metadata: JSON.stringify({ company_id: "101" })
   });
 
   const onChange = (e) => {
@@ -26,7 +27,14 @@ export default function CreateDraftTemplate(props) {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append('files[0]', e.target.elements['files'].value);
+    if (fileChoice) {
+        // formData.append('files[0]', e.target.elements['files'].files);
+        for (let i = 0; i<e.target.elements['files'].files.length; i++) {
+          formData.append(`files[${i}]`, e.target.elements['files'].files[i]);
+        }
+    } else {
+      formData.append('file_url[0]', e.target.elements['file_urls'].value);
+    }
 
     if (e.target.elements['title'].value) {
       formData.append('title', e.target.elements['title'].value);
@@ -58,10 +66,8 @@ export default function CreateDraftTemplate(props) {
     });
 
     const body = await res.json();
-    debugger;
-    if (res.ok && res.status === 200) {
-      const { edit_url } = body;
-      console.log('response ', body);
+    if (res.ok && body.statusCode === 200) {
+      const { template: { edit_url } } = body;
       router.push({
         pathname: '/embedded-viewer',
         query: { url:edit_url },
@@ -72,13 +78,14 @@ export default function CreateDraftTemplate(props) {
       console.error(error);
       setErrorMessage(error);
       } else {
-        setErrorMessage(`error status ${res.status}`)
+        setErrorMessage(`error status ${body.statusCode}`)
       }
     }
   };
   return (
     <Main>
       {userJson && <form onSubmit={onSubmit}>
+        {errorMessage && <div>{errorMessage}</div>}
         <div>
           <label htmlFor="title">Title:
             <input id="title" name="title" onChange={onChange} value={request.title} />
@@ -107,21 +114,21 @@ export default function CreateDraftTemplate(props) {
           <label>File URL/File Upload</label>
         <div>
           <label htmlFor="file_choice0">File URL:
-            <input id="file_choice0" required type="radio" name="file_choice" value="0" disabled={!!fileChoice} checked={!fileChoice} />
+            <input id="file_choice0" required type="radio" name="file_choice" onChange={()=> setFileChoice(0)} value="0" checked={!fileChoice} />
           </label>
           <label htmlFor="file_choice1">Files Upload
-            <input id="file_choice1" required type="radio" name="file_choice"  value="1" disabled={!fileChoice} checked={!!fileChoice} />
+            <input id="file_choice1" required type="radio" name="file_choice"  onChange={()=> setFileChoice(1)} value="1" checked={!!fileChoice} />
           </label>
         </div>
         </div>
         <div>
           <label htmlFor="file_url">Files:
-            <textarea id="file_url" required type="text" name="file_url" />
+            <textarea id="file_url" required type="text" onChange={(e) => setFileUrl(e.target.value)} disabled={!!fileChoice} name="file_urls" value={fileUrl} />
           </label>
         </div>
         <div>
           <label htmlFor="files">Files:
-            <input id="files" required type="file" name="files" />
+            <input id="files" required type="file" disabled={!fileChoice} name="files" />
           </label>
         </div>
         <button type="submit">Create Draft Template</button>

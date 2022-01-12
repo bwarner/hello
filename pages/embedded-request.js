@@ -16,23 +16,23 @@ export default function CreateEmbeddedRequest(props) {
     title: `Bill of Lading #${id}`,
     subject: 'Moving Job',
     message: faker.lorem.sentence(),
-    template_id: 'e17602c9261a29ede9fe60bfb35b1e71ea22691f',
+    template_id: '326977f3715d06746f9c99f24b2b4a1b9432eca0',
     requester_email_address: 'bwarner@oncue.co',
     signers: [
       {
-        name: '',
-        email_address: '',
-        role: 'Client',
-      },
-      {
         name,
         email_address: email,
-        role: 'Client',
+        role: 'shipper',
+      },
+      {
+        name: '',
+        email_address: '',
+        role: 'carrier',
       },
     ]
   });
   useEffect(() => {
-    setRequest(old => set('signers[0]', {
+    setRequest(old => set('signers[1]', {
       name: user.name || '',
       email_address: user.email || '',
       role: 'carrier',

@@ -1,8 +1,9 @@
 import HellosignSDK from 'hellosign-sdk';
 import multiparty from 'multiparty';
 import set from 'lodash/fp/set';
+import fs from 'fs';
 
-const clientId = process.env.NEXT_PUBLIC_HELLOSIGN_CLIENT_ID;
+const client_id = process.env.NEXT_PUBLIC_HELLOSIGN_CLIENT_ID;
 const hellosign = HellosignSDK({ key: process.env.API_KEY });
 
 export const config = {
@@ -18,7 +19,7 @@ export default async function handler(req, res) {
   switch (method) {
     case 'POST': {
       try {
-        console.log('recieved body', body);
+        console.log('received body', body);
 
         var form = new multiparty.Form();
         form.parse(req, async function(err, fields, files) {
@@ -26,14 +27,21 @@ export default async function handler(req, res) {
             console.log(err);
             res.status(400).json({ error: err.message ? err.message : err.toString()});
           } else {
-
             console.log('fields ', fields);
             console.log('files ', files);
-
             const query = Object.keys(fields).reduce((params, name) => set(name, fields[name][0], params), {});
-            console.log('query ', query);
+            const keys = Object.keys(files);
+            if (keys.length > 0) {
+              let fileBuffers = [];
+              keys.map(key => files[key]).forEach(fileInfos => {
+                fileBuffers = fileBuffers.concat(fileInfos.map(fileInfo => fileInfo.path));
+              });
+              query.file = fileBuffers;
+            }
             try {
-              const data = await hellosign.template.createEmbeddedDraft({ ...query, test_mode: 1, clientId});
+              const opts = { ...query, clientId: client_id, test_mode: 1};
+              console.log('opts ', opts);
+              const data = await hellosign.template.createEmbeddedDraft(opts);
               console.log('createEmbeddedDraft returned ', data);
               res.status(200).json(data);
             } catch(e) {
